@@ -14,6 +14,16 @@ app.get('/', function (req, res) {
     res.send("hello world from the HTTP server");
 });
 
+// modify the code for a “cross origin request”
+// which means making requests for data from this server
+// via another server (the PhoneGap server)
+app.use(function(req, res, next) {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.header("Access-Control-Allow-Headers", "X-Requested-With");
+	next();
+});
+
+
 // adding functionality to log the requests - useful for debugging
 app.use(function (req, res, next) {
 	var filename = path.basename(req.url);

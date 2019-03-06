@@ -3,22 +3,13 @@ var express = require('express');
 var path = require("path");
 var app = express();
 
-// body-parser allows us to process uploaded data
-var bodyParser = require('body-parser');
-app.use(bodyParser.urlencoded({
-	extended: true
-}));
-app.use(bodyParser.json());
-
 // setting up a database connection
 var fs = require('fs');
 var pg = require('pg');
 
-var configtext =
-""+fs.readFileSync("/home/studentuser/certs/postGISConnection.js");
+var configtext = "" +fs.readFileSync("/home/studentuser/certs/postGISConnection.js");
 
-// converting the configruation file into the correct format - i.e. a name/value
-pair array
+// converting the configruation file into the correct format - i.e. a name/value pair array
 var configarray = configtext.split(",");
 var config = {};
 for (var i = 0; i < configarray.length; i++) {
@@ -27,6 +18,13 @@ for (var i = 0; i < configarray.length; i++) {
 }
 
 var pool = new pg.Pool(config);
+
+// body-parser allows us to process uploaded data
+var bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({
+	extended: true
+}));
+app.use(bodyParser.json());
 
 // app.get to test out the connection
 app.get('/postgistest', function (req,res) {

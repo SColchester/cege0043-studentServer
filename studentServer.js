@@ -44,6 +44,14 @@ app.get('/postgistest', function (req,res) {
 	});
 });
 
+// this will actually do the POST request and upload this to Ubuntu and GitHub
+app.post('/reflectData',function(req,res){
+	console.dir(req.body);
+	// for now, just echo the request back to the client
+	res.send(req.body);
+});
+
+
 // add an http server to serve files to the Edge browser
 // due to certificate issues it rejects the https files if they are not
 // directly called in a typed URL

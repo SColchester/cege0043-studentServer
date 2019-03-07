@@ -35,7 +35,7 @@ httpServer.listen(4480);
 
 // modify the code for a “cross origin request”
 // which means making requests for data from this server
-// via another server (the PhoneGap server)
+// via another server (the PhoneGap server) - keep this high in the file, below the htttpServer.listen line
 app.use(function(req, res, next) {
 	res.header("Access-Control-Allow-Origin", "*");
 	res.header("Access-Control-Allow-Headers", "X-Requested-With");
@@ -86,10 +86,17 @@ app.post('/uploadData',function(req,res){
 		var surname = req.body.surname;
 		var module = req.body.module;
 		var portnum = req.body.port_id;
+		var language = req.body.language;
+		var modulelist = req.body.modulelist;
+		var lecturetime = req.body.lecturetime;
 
-		var querystring = "INSERT into formdata (name,surname,module, port_id) values ($1,$2,$3,$4)";
+		var geometrystring = "st_geomfromtext('POINT("+req.body.longitude + " "+
+		req.body.latitude + ")')";
+
+		var querystring = "INSERT into formdata (name,surname,module,port_id,language,modulelist,lecturetime,geom) values ($1,$2,$3,$4,$5,$6,$7,";
+		var querystring = querystring + geometrystring + ")";
 		console.log(querystring);
-		client.query(querystring,[name,surname,module,portnum],function(err,result) {
+		client.query(querystring,[name,surname,module,portnum,language,modulelist,lecturetime],function(err,result) {
 			done();
 			if(err){
 				console.log(err);

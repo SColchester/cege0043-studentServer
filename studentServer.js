@@ -26,7 +26,28 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
+// add an http server to serve files to the Edge browser
+// due to certificate issues it rejects the https files if they are not
+// directly called in a typed URL
+var http = require('http');
+var httpServer = http.createServer(app);
+httpServer.listen(4480);
+
+// modify the code for a “cross origin request”
+// which means making requests for data from this server
+// via another server (the PhoneGap server)
+app.use(function(req, res, next) {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.header("Access-Control-Allow-Headers", "X-Requested-With");
+	next();
+});
+
+app.get('/', function (req, res) {
+    res.send("hello world from the HTTP server");
+});
+
 // app.get to test out the connection
+// Test with: http://developer.cege.ucl.ac.uk:31269/postgistest
 app.get('/postgistest', function (req,res) {
 	pool.connect(function(err,client,done) {
 		if(err){
@@ -44,12 +65,18 @@ app.get('/postgistest', function (req,res) {
 	});
 });
 
+// add POST request
+app.post('/reflectData', function (req, res) {
+	console.dir(req.body);
+	// for now, just echo
+	res.send(req.body);
+});
+
 // this will actually do the POST request and upload this to Ubuntu and GitHub
 app.post('/uploadData',function(req,res){
 	// note that we are using POST here as we are uploading data
 	// so the parameters form part of the BODY of the request rather than the RESTful API
 	console.dir(req.body);
-
 	pool.connect(function(err,client,done) {
 		if(err){
 			console.log("not able to get connection "+ err);
@@ -61,7 +88,6 @@ app.post('/uploadData',function(req,res){
 		var portnum = req.body.port_id;
 
 		var querystring = "INSERT into formdata (name,surname,module, port_id) values ($1,$2,$3,$4)";
-		
 		console.log(querystring);
 		client.query(querystring,[name,surname,module,portnum],function(err,result) {
 			done();
@@ -73,28 +99,6 @@ app.post('/uploadData',function(req,res){
 		});
 	});
 });
-
-
-// add an http server to serve files to the Edge browser
-// due to certificate issues it rejects the https files if they are not
-// directly called in a typed URL
-var http = require('http');
-var httpServer = http.createServer(app);
-httpServer.listen(4480);
-
-app.get('/', function (req, res) {
-    res.send("hello world from the HTTP server");
-});
-
-// modify the code for a “cross origin request”
-// which means making requests for data from this server
-// via another server (the PhoneGap server)
-app.use(function(req, res, next) {
-	res.header("Access-Control-Allow-Origin", "*");
-	res.header("Access-Control-Allow-Headers", "X-Requested-With");
-	next();
-});
-
 
 // adding functionality to log the requests - useful for debugging
 app.use(function (req, res, next) {
